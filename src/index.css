@@ -1,0 +1,22 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech&display=swap');
+@import "tailwindcss";
+
+
+
+@theme {
+  /* --font-Dancing: "Dancing Script", cursive; */
+  --font-Share: "Share Tech", sans-serif;
+}
+
+:root {
+  
+  --main-web-color: #059669;     
+  --main-bg-color: #f8fafc;       
+  --text: #064e3b;               
+
+  --eco-accent: #10b981;         
+  --eco-light: #ecfdf5;           
+  --eco-border: #d1fae5;          
+  --eco-gradient: linear-gradient(135deg, #065f46 0%, #10b981 100%);
+}
