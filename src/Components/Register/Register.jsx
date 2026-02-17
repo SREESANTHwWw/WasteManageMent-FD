@@ -255,7 +255,7 @@ const onSubmit = async (data) => {
           <div className="mt-8 text-center text-xs font-bold uppercase tracking-widest">
             <Typography Account className="text-gray-400">Already a member? </Typography>
             <Link
-              to="/"
+              to="/login"
               className="hover:underline transition-all"
               style={{ color: "var(--main-web-color, #059669)" }}
             >

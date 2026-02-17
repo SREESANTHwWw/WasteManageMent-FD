@@ -11,7 +11,11 @@ const SideBar = ({ isOpen, setIsOpen, user }) => {
   const [expanded, setExpanded] = useState(null);
   const location = useLocation();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+   console.log(user);
+   const role = user?.role || "guest";
 
+
+   
   // Update mobile state on resize
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -23,7 +27,7 @@ const SideBar = ({ isOpen, setIsOpen, user }) => {
     setExpanded(expanded === title ? null : title);
   };
 
-  const filteredMenu = menu.filter((item) => item.roles?.includes(user.role));
+  const filteredMenu = menu.filter((item) => item.roles.includes(role));
 
   return (
     <>
@@ -131,11 +135,11 @@ const SideBar = ({ isOpen, setIsOpen, user }) => {
 
         {/* Footer */}
         <div className="p-4 border-t border-slate-50 flex items-center gap-3">
-          <Typography className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">{user.fullName.charAt(0)}</Typography>
+          <Typography className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">{user?.fullName?.charAt(0)}</Typography>
           {(isOpen || isMobile) && (
             <div className="overflow-hidden flex flex-col">
-              <Typography className="text-sm font-bold text-slate-700 truncate">{capitalizeFirst(user.fullName)}</Typography>
-              <Typography className="text-xs text-slate-400 capitalize">{user.role}</Typography>
+              <Typography className="text-sm font-bold text-slate-700 truncate">{capitalizeFirst(user?.fullName)}</Typography>
+              <Typography className="text-xs text-slate-400 capitalize">{user?.role}</Typography>
             </div>
           )}
         </div>

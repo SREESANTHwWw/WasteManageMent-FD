@@ -91,7 +91,7 @@ const Overview = () => {
         </Typography>
 
         <button
-          onClick={() => navigate("/home/reportwaste")}
+          onClick={() => navigate("/dashboard/reportwaste")}
           className="bg-emerald-600 text-white cursor-pointer px-6 py-3 rounded-xl font-medium shadow-lg hover:bg-emerald-700 transition-all"
         >
           <Typography>Report New Waste</Typography>
@@ -125,7 +125,7 @@ const Overview = () => {
               Recent Reports
             </Typography>
             <button
-              onClick={() => navigate("/home/myreports")}
+              onClick={() => navigate("/dashboard/myreports")}
               className="text-emerald-600 text-sm cursor-pointer flex items-center  gap-1"
             >
             <Typography>View all </Typography>  
@@ -151,7 +151,7 @@ const Overview = () => {
           rank={myRankIndex ?? "--"}
           totalStudents={totalStudents || "--"}
           rewardPoint={user?.rewardPoint || 0}
-          onViewLeaderboard={() => navigate("/home/myrank")}
+          onViewLeaderboard={() => navigate("/dashboard/myrank")}
         />
       </div>
     </div>

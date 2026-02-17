@@ -1,44 +1,57 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Camera,
-  CheckCircle2,
   ChevronRight,
+  ChevronLeft,
   X,
   Loader2,
   MapPin,
-  Leaf,
   Sparkles,
+  CheckCircle2,
+  Trash2,
   Info,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
-import { TextController, Typography } from "../../@All/Tags/Tags";
+import {
+  TextController,
+  OptionController,
+  Typography,
+} from "../../@All/Tags/Tags";
 import api from "../../Api/APi";
 import { useAuth } from "../Context/UserContext/UserContext";
 import ReportNotification from "./ReportNotification/ReportNotification";
 import WasteCategory from "./CategoryPart/WasteCategory";
+import ReportHeader from "./ReportHeader/ReportHeader";
+import LocationDetails from "./Steps/LocationDetails";
+import CategorySelect from "./Steps/CategorySelect";
+
+const MAX_IMAGES = 5;
 
 const ReportWaste = () => {
+  const [step, setStep] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [imagePreview, setImagePreview] = useState(null); // string (objectURL)
-  const [imageFile, setImageFile] = useState(null); // File
+  const [imagePreviews, setImagePreviews] = useState([]);
+  const [imageFiles, setImageFiles] = useState([]);
   const [selectedCat, setSelectedCat] = useState("");
-  const {user ,fetchUser}  = useAuth()
-  console.log(user);
-  
+
+  const { user, fetchUser } = useAuth();
   const {
     control,
     handleSubmit,
+    trigger,
+    watch,
     formState: { errors },
     reset,
   } = useForm({
     defaultValues: { location: "", description: "" },
   });
 
-  // ✅ Backend enum values (note: "PAPPER" is from your backend typo)
+  const currentLocation = watch("location");
+
   const categories = [
     { id: "PLASTIC", label: "Plastic", icon: "🥤" },
     { id: "ORGANIC", label: "Organic", icon: "🍎" },
@@ -46,237 +59,287 @@ const ReportWaste = () => {
     { id: "OTHERS", label: "Others", icon: "🗑️" },
   ];
 
-  const clearImage = () => {
-    if (imagePreview) URL.revokeObjectURL(imagePreview);
-    setImageFile(null);
-    setImagePreview(null);
+  const locationOptions = [
+    { value: "library", label: "Central Library" },
+    { value: "canteen", label: "Main Canteen" },
+    { value: "hostel_a", label: "Boys Hostel A" },
+    { value: "hostel_b", label: "Girls Hostel B" },
+    { value: "sports_complex", label: "Sports Complex" },
+    { value: "OTHERS", label: "Other Location" },
+  ];
+
+  // Navigation Logic
+  const nextStep = async () => {
+    if (step === 1) {
+      const isValid = await trigger(["location"]);
+      if (!isValid) return;
+    }
+    if (step === 2 && !selectedCat) {
+      return toast.error("Please select a category to continue");
+    }
+    setStep((prev) => prev + 1);
   };
 
-  useEffect(() => {
-    
-    return () => {
-      if (imagePreview) URL.revokeObjectURL(imagePreview);
-    };
-   
-  }, [imagePreview]);
+  const prevStep = () => setStep((prev) => prev - 1);
+
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files || []);
+    const remaining = MAX_IMAGES - imageFiles.length;
+    if (remaining <= 0) return toast.error("Maximum 5 images allowed");
+
+    const toAdd = files.slice(0, remaining);
+    setImageFiles((prev) => [...prev, ...toAdd]);
+    setImagePreviews((prev) => [
+      ...prev,
+      ...toAdd.map((f) => URL.createObjectURL(f)),
+    ]);
+  };
+
+  const removeImage = (idx) => {
+    URL.revokeObjectURL(imagePreviews[idx]);
+    setImagePreviews((prev) => prev.filter((_, i) => i !== idx));
+    setImageFiles((prev) => prev.filter((_, i) => i !== idx));
+  };
 
   const onReportSubmit = async (data) => {
-    if (!selectedCat) return toast.error("Please select a category");
-    if (!imageFile) return toast.error("Please upload an image");
+    if (imageFiles.length === 0) return toast(' upload evidence', {
+  icon: '🫠',
+});
+   
 
     try {
       setIsSubmitting(true);
-
       const formData = new FormData();
       formData.append("wasteLocation", data.location);
       formData.append("description", data.description || "");
+      formData.append(
+        "landmark",
+        data.landmark,
+      );
       formData.append("wasteCategory", selectedCat);
-      formData.append("wasteImage", imageFile);
+      imageFiles.forEach((file) => formData.append("wasteImage", file));
 
-     
-      const res = await api.post("/report/waste", formData);
+      const res = await api.post("/report/waste", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       if (res?.data?.success) {
         setShowModal(true);
-        toast.success("Report submitted successfully");
-        await fetchUser()
-      } else {
-        toast.error(res?.data?.msg || "Report failed");
+        await fetchUser();
       }
     } catch (error) {
-      console.error(error);
-      toast.error(error?.response?.data?.msg || "Something went wrong");
+      toast.error(error?.response?.data?.msg || "Submission failed");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const closeModal = () => {
+  const resetAll = () => {
     setShowModal(false);
+    setStep(1);
     setSelectedCat("");
-    clearImage();
+    setImageFiles([]);
+    setImagePreviews([]);
     reset();
   };
 
-  // Animation variants
-  const staggerContainer = {
-    animate: { transition: { staggerChildren: 0.1 } },
-  };
-
-      const fadeInUp = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-  };
-
   return (
-    <div className="relative min-h-[calc(100vh-100px)] flex items-center justify-center p-4">
-    
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
-          transition={{ duration: 20, repeat: Infinity }}
-          className="absolute -top-[10%] -right-[10%] w-96 h-96 bg-emerald-100/40 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{ scale: [1.2, 1, 1.2], x: [0, 50, 0] }}
-          transition={{ duration: 15, repeat: Infinity }}
-          className="absolute bottom-0 -left-[5%] w-80 h-80 bg-blue-100/30 rounded-full blur-3xl"
-        />
+    <div className="h-full  ">
+      <ReportHeader user={user} />
+      <div className="max-w-5xl  mx-auto">
+        {/* Progress Bar */}
+        <div className="mb-4 relative">
+          <div className="flex justify-between relative z-10">
+            {[1, 2, 3].map((num) => (
+              <div key={num} className="flex flex-col items-center gap-2">
+                <div
+                  className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold transition-all duration-500 border-2 ${
+                    step >= num
+                      ? "bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-100"
+                      : "bg-white border-slate-100 text-slate-300"
+                  }`}
+                >
+                  {step > num ? <CheckCircle2 size={20} /> : num}
+                </div>
+                <span
+                  className={`text-[10px] font-black uppercase tracking-widest ${step >= num ? "text-emerald-600" : "text-slate-300"}`}
+                >
+                  {num === 1 ? "Site" : num === 2 ? "Type" : "Proof"}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="absolute top-5 left-0 w-full h-0.5 bg-slate-100 z-0" />
+        </div>
+
+        <form
+          onSubmit={handleSubmit(onReportSubmit)}
+          className="bg-white rounded-[2.5rem] w-full shadow-xl shadow-slate-200/60 border border-slate-100 overflow-hidden"
+        >
+          <div className="p-8 sm:p-10">
+            <AnimatePresence mode="wait">
+              {/* STEP 1: LOCATION DETAILS */}
+              {step === 1 && (
+               
+                <LocationDetails
+                   control={control}
+                   errors={errors}
+                   locationOptions={locationOptions}
+                   currentLocation={currentLocation}
+
+                />
+              )}
+
+              {/* STEP 2: CATEGORY SELECT */}
+              {step === 2 && (
+                <CategorySelect categories={categories} selectedCat={selectedCat} setSelectedCat={setSelectedCat}/>
+              )}
+
+              {/* STEP 3: MEDIA UPLOAD */}
+            {step === 3 && (
+  <motion.div
+    key="step3"
+    initial={{ opacity: 0, x: 10 }}
+    animate={{ opacity: 1, x: 0 }}
+    exit={{ opacity: 0, x: -10 }}
+    className="space-y-6"
+  >
+    <div className="flex justify-between items-end">
+      <div className="flex flex-col">
+        <Typography className="text-2xl font-black text-slate-900 tracking-tight">
+          Evidence Proof
+        </Typography>
+        <Typography className="text-sm text-slate-400 mt-1">
+          Upload clear images of the waste.
+        </Typography>
+      </div>
+      <Typography className="text-xs font-bold text-slate-400 uppercase">
+        {imageFiles.length}/{MAX_IMAGES}
+      </Typography>
+    </div>
+
+    {/* Improved Grid Layout */}
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full">
+      <AnimatePresence mode="popLayout">
+        {imagePreviews.map((src, idx) => (
+          <motion.div
+            key={src}
+            layout
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            className="relative aspect-square bg-slate-100 rounded-3xl overflow-hidden border border-slate-100 shadow-sm group"
+          >
+            <img
+              src={src}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              alt="Waste preview"
+            />
+            
+            {/* Overlay Gradient for Delete Button visibility */}
+            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+            
+            <button
+              type="button"
+              onClick={() => removeImage(idx)}
+              className="absolute top-3 right-3 p-2 bg-rose-500 text-white rounded-xl shadow-lg transform -translate-y-2.5 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300"
+            >
+              <X size={16} strokeWidth={3} />
+            </button>
+          </motion.div>
+        ))}
+      </AnimatePresence>
+
+      {/* Upload Placeholder */}
+      {imageFiles.length < MAX_IMAGES && (
+        <label className="relative aspect-square rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-emerald-50 hover:border-emerald-200 hover:border-solid transition-all group">
+          <div className="p-3 bg-slate-50 rounded-2xl group-hover:bg-emerald-100 transition-colors">
+            <Camera
+              size={28}
+              className="text-slate-400 group-hover:text-emerald-600 transition-colors"
+            />
+          </div>
+          <span className="text-[10px] font-black text-slate-400 group-hover:text-emerald-600 uppercase mt-3 tracking-wider">
+            Add Photo
+          </span>
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            className="hidden"
+            onChange={handleImageUpload}
+          />
+        </label>
+      )}
+    </div>
+
+    {/* Review Strip */}
+    <div className="bg-slate-900 rounded-2xl p-4 flex items-center justify-between shadow-lg">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white shadow-inner">
+          <CheckCircle2 size={20} />
+        </div>
+        <div className="flex flex-col">
+          <Typography className="text-[10px] font-black text-emerald-500/80 uppercase tracking-widest leading-none mb-1">
+            Ready to Submit
+          </Typography>
+          <Typography className="text-sm text-white font-bold">
+            {currentLocation} • {selectedCat}
+          </Typography>
+        </div>
+      </div>
+      <Sparkles size={20} className="text-emerald-400 animate-pulse" />
+    </div>
+  </motion.div>
+)}
+            </AnimatePresence>
+          </div>
+
+          {/* FOOTER NAV */}
+          <div className="p-6 bg-slate-50 border-t border-slate-100 flex gap-4">
+            {step > 1 && (
+              <button
+                type="button"
+                onClick={prevStep}
+                className="h-14 px-8 rounded-2xl border cursor-pointer border-slate-200 font-bold text-slate-600 hover:bg-white transition-all flex items-center gap-2"
+              >
+                <ChevronLeft size={20} /> Back
+              </button>
+            )}
+
+            {step < 3 ? (
+              <button
+                type="button"
+                onClick={nextStep}
+                className="flex-1 h-14 bg-(--eco-accent) cursor-pointer text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-emerald-600 transition-all"
+              >
+                Next Stage <ChevronRight size={18} />
+              </button>
+            ) : (
+              <button
+                disabled={isSubmitting}
+                type="submit"
+                className="flex-1 h-14 bg-emerald-500 cursor-pointer text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 hover:bg-emerald-600 transition-all disabled:opacity-50"
+              >
+                {isSubmitting ? (
+                  <Loader2 className="animate-spin" size={20} />
+                ) : (
+                  "Finalize Report"
+                )}
+              </button>
+            )}
+          </div>
+        </form>
+
+        <div className="mt-8 text-center">
+          <Typography className="text-xs text-slate-400 font-medium">
+            Reports are verified by AI. Misleading reports may result in point
+            deductions.
+          </Typography>
+        </div>
       </div>
 
-      <motion.div
-        variants={staggerContainer}
-        initial="initial"
-        animate="animate"
-        className="relative w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-6"
-      >
-        {/* Header Section */}
-        <motion.div
-          variants={fadeInUp}
-          className="lg:col-span-12 flex flex-col md:flex-row md:items-end justify-between gap-4 mb-2"
-        >
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 text-[10px] font-black uppercase tracking-widest border border-emerald-100">
-                Eco-System v2.4
-              </span>
-            </div>
-            <Typography className="text-4xl font-black tracking-tight text-slate-800">
-              New Impact <span className="text-emerald-500">Report</span>
-            </Typography>
-          </div>
-
-          <div className="flex items-center gap-3 bg-white/60 backdrop-blur-md p-2 pr-6 rounded-2xl border border-white shadow-sm">
-            <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white">
-              <Sparkles size={18} />
-            </div>
-            <div className="flex flex-col">
-              <Typography className="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">
-                Potential Reward
-              </Typography>
-              <Typography className="text-sm font-black text-slate-800 leading-none">
-                {user?.rewardPoint} Eco-Points
-              </Typography>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Left Side: Category Selection */}
-      
-        <WasteCategory categories={categories} selectedCat={selectedCat} setSelectedCat={setSelectedCat}/>
-
-        {/* Right Side: Form */}
-        <motion.div variants={fadeInUp} className="lg:col-span-8">
-          <form onSubmit={handleSubmit(onReportSubmit)} className="space-y-4">
-            <div className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Image Upload Area */}
-                <div className="space-y-4">
-                  <Typography className="text-xs font-black uppercase tracking-widest text-slate-400">
-                    Media Proof
-                  </Typography>
-
-                  <div className="relative aspect-video md:aspect-square w-full">
-                    {imagePreview ? (
-                      <div className="relative w-full h-full rounded-4xl overflow-hidden border-4 border-white shadow-lg">
-                        <img
-                          src={imagePreview}
-                          className="w-full h-full object-cover"
-                          alt="Waste"
-                        />
-
-                        <button
-                          type="button"
-                          onClick={clearImage}
-                          className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur-md rounded-full text-rose-500 hover:scale-110 transition-transform shadow-md"
-                          aria-label="Remove image"
-                        >
-                          <X size={18} />
-                        </button>
-                      </div>
-                    ) : (
-                      <label className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed border-slate-200 rounded-4xl bg-slate-50/50 cursor-pointer hover:bg-emerald-50 hover:border-emerald-300 transition-all group">
-                        <div className="w-14 h-14 rounded-full bg-white shadow-sm flex items-center justify-center text-slate-400 group-hover:text-emerald-500 transition-colors">
-                          <Camera size={24} />
-                        </div>
-                        <Typography className="text-[10px] font-black uppercase text-slate-400 mt-4 tracking-tighter">
-                          Click to capture
-                        </Typography>
-
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (!file) return;
-
-                          
-                            if (imagePreview) URL.revokeObjectURL(imagePreview);
-
-                            const previewUrl = URL.createObjectURL(file);
-                            setImageFile(file);
-                            setImagePreview(previewUrl);
-
-                           
-                            e.target.value = "";
-                          }}
-                        />
-                      </label>
-                    )}
-                  </div>
-                </div>
-
-                {/* Text Inputs Area */}
-                <div className="flex flex-col justify-between py-2">
-                  <div className="space-y-6">
-                    <div className="relative">
-                      <MapPin className="absolute right-4 top-10 text-emerald-500" size={18} />
-                      <TextController
-                        name="location"
-                        label="Discovery Point"
-                        placeholder="e.g. Science Block Floor 2"
-                        control={control}
-                        errors={errors}
-                      />
-                    </div>
-
-                    <TextController
-                      name="description"
-                      label="Brief Context"
-                      placeholder="What kind of waste is it?"
-                      control={control}
-                      errors={errors}
-                    />
-                  </div>
-
-                  <motion.button
-                    disabled={isSubmitting}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    type="submit"
-                    className="w-full mt-8 py-5 cursor-pointer bg-slate-900 text-white rounded-3xl font-black flex items-center justify-center gap-3 shadow-2xl shadow-slate-300 transition-all disabled:opacity-50"
-                  >
-                    {isSubmitting ? (
-                      <Loader2 className="animate-spin" size={20} />
-                    ) : (
-                      <>
-                        <Typography className="uppercase tracking-[0.2em] text-xs">
-                          Authorize Submission
-                        </Typography>
-                        <ChevronRight size={18} />
-                      </>
-                    )}
-                  </motion.button>
-                </div>
-              </div>
-            </div>
-          </form>
-        </motion.div>
-      </motion.div>
-
-   
-      <ReportNotification showModal={showModal} closeModal={closeModal} />
+      <ReportNotification showModal={showModal} closeModal={resetAll} />
     </div>
   );
 };

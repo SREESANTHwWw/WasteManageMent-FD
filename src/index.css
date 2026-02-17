@@ -1,5 +1,6 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Domine:wght@400..700&family=Share+Tech&display=swap');
 @import "tailwindcss";
 
 
@@ -7,6 +8,7 @@
 @theme {
   /* --font-Dancing: "Dancing Script", cursive; */
   --font-Share: "Share Tech", sans-serif;
+  --font-Domine: "Domine", serif;
 }
 
 :root {

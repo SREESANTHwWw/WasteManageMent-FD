@@ -68,7 +68,7 @@ const StudentStaffLogin = () => {
         toast.success(res.data.msg);
 
         // redirect
-        navigate("/home");
+        navigate("/");
       }
     } catch (error) {
       console.error(error);
