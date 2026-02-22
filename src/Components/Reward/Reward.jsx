@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../Context/UserContext/UserContext";
 import { Typography } from "../../@All/Tags/Tags";
+import api from "../../Api/APi";
 
 const RewardGate = () => {
   const { user } = useAuth();
@@ -17,6 +18,25 @@ const RewardGate = () => {
   const THRESHOLD = 5000;
   const isUnlocked = userPoints >= THRESHOLD;
   const progressPercent = Math.min((userPoints / THRESHOLD) * 100, 100);
+  const handleDownload = async () => {
+  try {
+    const res = await api.get("/download/certificate", {
+      responseType: "blob",
+    });
+
+    const url = window.URL.createObjectURL(new Blob([res.data]));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "certificate.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    const msg = err?.response?.data?.msg || "Download failed";
+    alert(msg);
+  }
+};
 
   return (
     <div className="flex w-full justify-center items-center min-h-full p-6">
@@ -28,7 +48,7 @@ const RewardGate = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 1.05 }}
-            className="relative w-full max-w-7xl bg-white border-16 border-double border-slate-100 p-1 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] rounded-[3rem] overflow-hidden"
+            className="relative w-full max-w-7xl bg-white border-16 border-double border-slate-100 p-5 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] rounded-[3rem] overflow-hidden"
           >
             {/* Background Flair */}
             <div className="absolute top-0 left-0 w-full h-3 bg-linear-to-r from-yellow-500 via-amber-200 to-yellow-500" />
@@ -51,10 +71,10 @@ const RewardGate = () => {
 
               {/* Right Column: Content */}
               <div className="lg:col-span-8 text-left space-y-6">
-                <div className="space-y-2">
-                  <Typography className="text-sm font-bold tracking-[0.3em] text-amber-600 uppercase">
+                <div className="space-y-2 flex flex-col gap-2">
+                  {/* <Typography className="text-sm font-bold tracking-[0.3em] text-amber-600 uppercase">
                     Official Recognition
-                  </Typography>
+                  </Typography> */}
                   <Typography className="text-6xl font-black text-slate-900 leading-none">
                     CERTIFICATE OF <br/> ACHIEVEMENT
                   </Typography>
@@ -71,7 +91,7 @@ const RewardGate = () => {
                   <div className="h-1 w-full max-w-md bg-linear-to-r from-amber-400 to-transparent mt-4" />
                 </div>
 
-                <Typography className="max-w-2xl text-lg text-slate-600 leading-relaxed">
+                <Typography className="max-w-2xl text-lg text-slate-600  leading-relaxed">
                   For outstanding performance and achieving the elite milestone of 
                   <span className="font-bold text-slate-900 mx-2 inline-flex items-center gap-1">
                     <Star size={18} className="text-amber-500 fill-amber-500" />
@@ -81,14 +101,15 @@ const RewardGate = () => {
                 </Typography>
 
                 <div className="flex gap-4 pt-6">
-                  <motion.button
-                    whileHover={{ scale: 1.05, x: 5 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="flex items-center gap-3 bg-slate-900 text-white px-12 py-6 rounded-2xl font-bold text-xl shadow-xl hover:bg-black transition-all"
-                  >
-                    <Download size={24} />
-                    Download PDF
-                  </motion.button>
+                 <motion.button
+  onClick={handleDownload}
+  whileHover={{ scale: 1.05, x: 5 }}
+  whileTap={{ scale: 0.95 }}
+  className="flex items-center gap-3 bg-(--main-web-color) text-white px-12 py-6 rounded-2xl font-bold text-xl shadow-xl cursor-pointer hover:bg-(--eco-accent) transition-all"
+>
+  <Download size={24} />
+  Download PDF
+</motion.button>
                   <button className="flex items-center gap-2 text-slate-500 px-8 py-6 rounded-2xl font-semibold hover:bg-slate-50 transition-colors">
                     <FileCheck size={24} />
                     Verify ID: #CERT-{Math.floor(Math.random() * 100000)}

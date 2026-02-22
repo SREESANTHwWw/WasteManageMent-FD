@@ -79,12 +79,12 @@ const menu = [
   },
 
   // Common (logged-in)
-  {
-    title: "Settings",
-    url: "/dashboard/settings",
-    icon: MdOutlineSettings,
-    roles: ["student", "staff", "admin"],
-  },
+  // {
+  //   title: "Settings",
+  //   url: "/dashboard/settings",
+  //   icon: MdOutlineSettings,
+  //   roles: ["student", "staff", "admin"],
+  // },
 ];
 
 export { size };

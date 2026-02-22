@@ -1,157 +1,244 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Leaf, Trophy, Trash2, Zap, ArrowUpRight } from "lucide-react";
-
+import {
+  Zap,
+  Clock,
+  CheckCircle2,
+  MapPin,
+  ChevronRight,
+  Power,
+  ShieldCheck,
+  Calendar,
+  Briefcase,
+} from "lucide-react";
 
 import { Typography } from "../../@All/Tags/Tags";
 import { useAuth } from "../Context/UserContext/UserContext";
-import { formatTime } from "../../functions/FormateDate";
-import { useNavigate } from "react-router-dom";
 import { capitalizeFirst } from "../../functions/capitalizeFirst";
 import api from "../../Api/APi";
-import Statcard from "../OverView/StarCard/Startcard";
-import ActivityItem from "../OverView/ActivityItem/ActivityItem";
+import StatBox from "./StatBox/StatBox";
+import RecentrepStaff from "./RecentActivity/RecentrepStaff";
+import { useNavigate } from "react-router-dom";
 
-const StaffOverview = () => {
-  const navigate = useNavigate();
+
+const StaffOverView = () => {
   const { user } = useAuth();
+ const navigate =useNavigate()
+  const [reports ,setReports] = useState([])
+  const [status, setStatus] = useState("OFFLINE");
+  const [loadingStatus, setLoadingStatus] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const reports = user?.wastereports || [];
+ 
+  useEffect(() => {
+    if (user?.status) setStatus(user.status);
+  }, [user]);
 
 
-  const [leaderboardStudents, setLeaderboardStudents] = useState([]);
-  const [totalStudents, setTotalStudents] = useState(0);
+const [statusSummary, setStatusSummary] = useState({
+  PENDING: 0,
+  IN_PROGRESS: 0,
+  RESOLVED: 0,
+});
 
-  const fetchLeaderboardMeta = async () => {
+
+const fetchReports = async () => {
+  setLoading(true);
+  try {
+    const res = await api.get("/getAll/reports");
+    setReports(res.data.reports || []);
+    setStatusSummary(res.data.statusSummary || { PENDING: 0, IN_PROGRESS: 0, RESOLVED: 0 });
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+  useEffect(() => {
+    fetchReports();
+  }, [user]);
+
+ 
+const statsData = useMemo(() => {
+  const pendingCount = statusSummary.PENDING || 0;
+  const inProgressCount = statusSummary.IN_PROGRESS || 0;
+  const resolvedCount = statusSummary.RESOLVED || 0;
+
+  return [
+    {
+      label: "Resolved Reports",
+      value: String(resolvedCount).padStart(2, "0"),
+      icon: <CheckCircle2 size={20} />,
+      color: "text-emerald-500",
+    },
+    {
+      label: "In Progress",
+      value: String(inProgressCount).padStart(2, "0"),
+      icon: <Clock size={20} />,
+      color: "text-blue-500",
+    },
+    {
+      label: "Pending Reports",
+      value: String(pendingCount).padStart(2, "0"),
+      icon: <Clock size={20} />,
+      color: "text-amber-500",
+    },
+  ];
+}, [statusSummary]);
+  
+  const recentReports = [
+    { id: "REP-992", location: "Central Library", time: "2 mins ago", status: "In Review", type: "Plastic" },
+    { id: "REP-881", location: "Main Canteen", time: "1 hour ago", status: "Verified", type: "Organic" },
+    { id: "REP-776", location: "Sports Complex", time: "3 hours ago", status: "Verified", type: "Paper" },
+  ];
+
+  const isOnline = status === "ONLINE";
+  const isInWork = status === "IN_WORK";
+
+  const initials = useMemo(() => {
+    const name = user?.fullName?.trim() || "ST";
+    const parts = name.split(" ").filter(Boolean);
+    const first = parts[0]?.[0] || "S";
+    const second = parts[1]?.[0] || parts[0]?.[1] || "T";
+    return (first + second).toUpperCase();
+  }, [user?.fullName]);
+
+  const statusMeta = useMemo(() => {
+    switch (status) {
+      case "ONLINE":
+        return { dot: "bg-emerald-500", label: "Online", pill: "bg-emerald-50 text-emerald-700 border-emerald-200", icon: <Power size={16} /> };
+      case "IN_WORK":
+        return { dot: "bg-amber-500", label: "In Work", pill: "bg-amber-50 text-amber-700 border-amber-200", icon: <Briefcase size={16} /> };
+      default:
+        return { dot: "bg-slate-300", label: "Offline", pill: "bg-slate-50 text-slate-500 border-slate-200", icon: <Power size={16} /> };
+    }
+  }, [status]);
+
+
+  const handleOnlineToggle = async () => {
     try {
-      const res = await api.get("/leaderboard");
-      if (res?.data?.success) {
-        setLeaderboardStudents(res.data.students || []);
-        setTotalStudents(res.data.totalStudents ?? (res.data.students?.length || 0));
-      }
-    } catch (e) {
-      console.log("leaderboard meta error:", e);
+      if (loadingStatus) return;
+
+    
+      if (status === "IN_WORK") return;
+
+      setLoadingStatus(true);
+
+      const newStatus = status === "ONLINE" ? "OFFLINE" : "ONLINE";
+
+      const res = await api.patch("/staff/status", { status: newStatus });
+
+     
+      const updatedStatus = res?.data?.status || res?.data?.user?.status || newStatus;
+      setStatus(updatedStatus);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoadingStatus(false);
     }
   };
 
-  useEffect(() => {
-   
-    if (user?._id) fetchLeaderboardMeta();
-  }, [user?._id]);
+  const  stat = [ {
 
+  }]
 
-  const myRankIndex = useMemo(() => {
-    if (!user?._id || !leaderboardStudents?.length) return null;
-    const idx = leaderboardStudents.findIndex((s) => s._id === user._id);
-    return idx === -1 ? null : idx + 1;
-  }, [user?._id, leaderboardStudents]);
-
-  const stats = [
-    {
-      title: "Pending Reports",
-      value: user?.wastereports?.length || 0,
-      icon: Trash2,
-      color: "text-blue-600",
-      bg: "bg-blue-100",
-    },
-    {
-      title: "Eco-Points Earned",
-      value: user?.rewardPoint || 0,
-      icon: Trophy,
-      color: "text-amber-600",
-      bg: "bg-amber-100",
-    },
-    {
-      title: "Reports Resolved",
-      value: user?.wastereports.filter(r => r.status === "RESOLVED").length || 0,
-      icon: Leaf,
-      color: "text-emerald-600",
-      bg: "bg-emerald-100",
-    },
-    {
-      title: "Active Reports",
-      value: reports.filter((r) => r.status !== "RESOLVED").length,
-      icon: Zap,
-      color: "text-purple-600",
-      bg: "bg-purple-100",
-    },
-  ];
-
-  const userdata = JSON.parse(localStorage.getItem("user") || "{}");
 
   return (
-    <div className="space-y-8">
-    
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="flex justify-between items-center"
-      >
-        <Typography className="text-2xl font-bold text-slate-800">
-          Hello, {capitalizeFirst(userdata?.fullName || "User")} 👋
-        </Typography>
+    <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-4">
+      <div className="max-w-6xl mx-auto space-y-5">
+        {/* --- HEADER --- */}
+        <header className="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-6 text-center md:text-left flex-col md:flex-row">
+            <div className="relative">
+              <div className="w-20 h-20 rounded-3xl bg-(--main-web-color) flex items-center justify-center text-white text-2xl font-black shadow-lg">
+                {initials}
+              </div>
 
-        <button
-          onClick={() => navigate("/dashboard/reportwaste")}
-          className="bg-emerald-600 text-white cursor-pointer px-6 py-3 rounded-xl font-medium shadow-lg hover:bg-emerald-700 transition-all"
-        >
-          <Typography>Report New Waste</Typography>
-        </button>
-      </motion.div>
+              <motion.div
+                animate={{ scale: isOnline ? [1, 1.2, 1] : 1 }}
+                transition={{ repeat: isOnline ? Infinity : 0, duration: 2 }}
+                className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-4 border-white ${statusMeta.dot}`}
+              />
+            </div>
 
-      {/* Stats Grid */}
-      <motion.div
-        initial="hidden"
-        animate="show"
-        variants={{ show: { transition: { staggerChildren: 0.1 } } }}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-      >
-        {stats.map((s, i) => (
-          <Statcard
-            key={i}
-            {...s}
-            variants={{
-              hidden: { opacity: 0, y: 20 },
-              show: { opacity: 1, y: 0 },
-            }}
-          />
-        ))}
-      </motion.div>
+            <div>
+              <Typography className="text-3xl font-black text-slate-900 tracking-tight">
+                Welcome back, {capitalizeFirst(user?.fullName || "Staff")}
+              </Typography>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Recent Activity */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <Typography className="text-lg font-bold text-slate-800">
-              Recent Reports
-            </Typography>
-            <button
-              onClick={() => navigate("/dashboard/myreports")}
-              className="text-emerald-600 text-sm cursor-pointer flex items-center  gap-1"
-            >
-            <Typography>View all </Typography>  
-            </button>
+              <div className="flex items-center gap-2 text-slate-400 mt-1 justify-center md:justify-start">
+                <ShieldCheck size={16} className="text-emerald-500" />
+                <Typography className="text-xs font-bold uppercase tracking-widest">
+                  Field Supervisor • ID #{user?.staffID || "----"}
+                </Typography>
+
+                <span className={`ml-2 px-3 py-1 rounded-xl border text-[10px] font-black uppercase ${statusMeta.pill}`}>
+                  {statusMeta.label}
+                </span>
+              </div>
+            </div>
           </div>
 
-          {reports?.length ? (
-            reports.slice(0, 4).map((r) => (
-              <ActivityItem
-                key={r._id}
-                location={r.wasteLocation}
-                time={formatTime(r.createdAt)}
-                status={r.status}
-              />
-            ))
-          ) : (
-            <Typography className="text-slate-500">No reports yet.</Typography>
-          )}
-        </div>
+          {/* STATUS BUTTON */}
+          <button
+            onClick={handleOnlineToggle}
+            disabled={loadingStatus || isInWork}
+            className={`group relative flex items-center gap-4 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+              isOnline
+                ? "bg-emerald-500 text-white shadow-lg shadow-emerald-200"
+                : "bg-white text-slate-400 border-2 border-slate-100 hover:border-slate-200"
+            }`}
+            title={isInWork ? "You are IN_WORK. Finish the current task to change status." : ""}
+          >
+            {status === "IN_WORK" ? <Briefcase size={18} /> : <Power size={18} className={isOnline ? "animate-pulse" : ""} />}
 
-      
-   
+            {loadingStatus
+              ? "Updating..."
+              : status === "IN_WORK"
+              ? "You are In Work"
+              : isOnline
+              ? "You are Online"
+              : "Set Go Online"}
+
+            {/* Offline ping indicator */}
+            {!isOnline && status !== "IN_WORK" && !loadingStatus && (
+              <span className="absolute -top-2 -right-2 flex h-4 w-4">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-4 w-4 bg-rose-500"></span>
+              </span>
+            )}
+          </button>
+        </header>
+
+    
+       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+  {statsData.map((stat, index) => (
+    <StatBox 
+      key={index}
+      label={stat.label} 
+      value={stat.value} 
+      icon={stat.icon} 
+      color={stat.color} 
+    />
+  ))}
+</div>
+
+        {/* --- RECENT ACTIVITY --- */}
+       <RecentrepStaff 
+        title="Recent Assignments"
+        subtitle="Updates on waste reports in your sector."
+        reports={reports} // This now uses the data from setReports(res.data.reports)
+        onViewAll={() => navigate("/dashboard/wastereports")}
+      />
       </div>
     </div>
   );
 };
 
-export default StaffOverview;
+
+
+
+
+
+export default StaffOverView;
