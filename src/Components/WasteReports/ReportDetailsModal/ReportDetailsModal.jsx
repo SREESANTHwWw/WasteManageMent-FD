@@ -50,8 +50,8 @@ const fmtDateTime = (date) =>
 
 const safeName = (userId) => {
   if (!userId) return "Unknown";
-  if (typeof userId === "string") return `User #${userId.slice(-6)}`;
-  return userId.fullName || `User #${String(userId._id || "").slice(-6)}`;
+  if (typeof userId === "string") return `User #${userId}`;
+  return userId.fullName || `User #${String(userId._id || "")}`;
 };
 
 const clampTopAI = (aiDistribution) => {
@@ -298,7 +298,7 @@ const ReportDetailsModal = ({ isOpen, onClose, report }) => {
                         Reported By
                       </Typography>
                       <Typography className="text-sm font-extrabold text-slate-800">
-                        {safeName(report?.userId)}
+                        {safeName(report?.userId?.fullName)}
                       </Typography>
                       {report?.userModel && (
                         <Typography className="text-[11px] font-bold text-slate-500">
@@ -312,7 +312,7 @@ const ReportDetailsModal = ({ isOpen, onClose, report }) => {
                         Resolved By
                       </Typography>
                       <Typography className="text-sm font-extrabold text-slate-800">
-                        {safeName(report?.resolvedBy)}
+                        {safeName(report?.resolvedBy?.fullName)}
                       </Typography>
                     </div>
                   </div>

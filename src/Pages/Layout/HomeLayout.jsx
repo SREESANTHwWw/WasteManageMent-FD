@@ -15,6 +15,7 @@ import StudentStaffLogin from "../../Components/loginPages/StudentAndStaff/Stude
 import { Typography } from "../../@All/Tags/Tags";
 import { capitalizeFirst } from "../../functions/capitalizeFirst";
 import { useAuth } from "../../Components/Context/UserContext/UserContext";
+import Register from "../../Components/Register/Register";
 
 const HomeLayout = () => {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ const HomeLayout = () => {
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [registerOpen ,setRegisterOpen] =useState(false)
 
 
   // Auth & User Data
@@ -58,7 +60,8 @@ const HomeLayout = () => {
         user={userData}
       />
 
-      {loginOpen && <StudentStaffLogin onclose={() => setLoginOpen(false)} />}
+      {loginOpen && <StudentStaffLogin onclose={() => setLoginOpen(false)} setRegisterOpen={setRegisterOpen} />}
+        {registerOpen && <Register onclose={() => setRegisterOpen(false)}  setLoginOpen={setLoginOpen}  />  }
 
       {/* TOP NAVBAR */}
       <motion.header
@@ -142,7 +145,7 @@ const HomeLayout = () => {
           <div className="relative">
             {!token ? (
               <button
-                onClick={() => navigate("/login")}
+                onClick={() => setLoginOpen(true)}
                 className="px-6 h-9 bg-emerald-600 hover:bg-emerald-700 shadow-lg font-semibold cursor-pointer rounded-lg text-white transition-all"
               >
                 <Typography> Login </Typography>
@@ -184,7 +187,7 @@ const HomeLayout = () => {
                       <button
                         onClick={() => {
                           logout();
-                          navigate("/login", { replace: true });
+                          
                         }}
                         className="flex cursor-pointer items-center gap-3 w-full px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
                       >

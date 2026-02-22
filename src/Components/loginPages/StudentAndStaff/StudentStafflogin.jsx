@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../Context/UserContext/UserContext";
-const StudentStaffLogin = () => {
+const StudentStaffLogin = ({ onclose,setRegisterOpen }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const { setToken } = useAuth();
   const navigate = useNavigate();
@@ -26,6 +26,11 @@ const StudentStaffLogin = () => {
       dateOfBirth: "",
     },
   });
+
+  const handleRegister = ()=>{
+         setRegisterOpen(true)
+         onclose()
+  }
 
   const onSubmit = async (data) => {
     try {
@@ -51,11 +56,10 @@ const StudentStaffLogin = () => {
 
       // ✅ success handling
       if (res.data?.success) {
-       
-       setToken(res.data.token);
+        setToken(res.data.token);
         localStorage.setItem("token", res.data.token);
         const user = res.data.student || res.data.staff;
-
+          
         localStorage.setItem(
           "user",
           JSON.stringify({
@@ -66,7 +70,7 @@ const StudentStaffLogin = () => {
 
         // optional toast
         toast.success(res.data.msg);
-
+         onclose()
         // redirect
         navigate("/");
       }
@@ -88,7 +92,7 @@ const StudentStaffLogin = () => {
   };
 
   return (
-    <div className=" flex items-center justify-center p-4 mt-5   ">
+    <div className=" fixed inset-0 z-50 backdrop-blur-2xl bg-black/50  flex items-center justify-center p-4    ">
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -155,6 +159,12 @@ const StudentStaffLogin = () => {
         {/* Right Side: Form */}
         <div className="md:w-[55%] p-8 md:p-16 flex flex-col justify-center bg-white relative">
           {/* Close Button */}
+          <button
+            onClick={onclose}
+            className="absolute top-6 right-6 p-2 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all cursor-pointer z-20"
+          >
+            <X size={24} />
+          </button>
 
           <div className="max-w-md mx-auto w-full">
             <header className="mb-10 text-center md:text-left flex flex-col">
@@ -179,14 +189,14 @@ const StudentStaffLogin = () => {
                 onClick={() => toggleRole(false)}
                 className={`flex-1 py-3 z-10 text-xs font-bold cursor-pointer uppercase tracking-wider transition-colors duration-300 ${!isAdmin ? "text-emerald-600" : "text-gray-400"}`}
               >
-             <Typography> Student</Typography>  
+                <Typography> Student</Typography>
               </button>
               <button
                 type="button"
                 onClick={() => toggleRole(true)}
                 className={`flex-1 py-3 z-10 text-xs font-bold uppercase cursor-pointer tracking-wider transition-colors duration-300 ${isAdmin ? "text-emerald-600" : "text-gray-400"}`}
               >
-              <Typography> Staff</Typography> 
+                <Typography> Staff</Typography>
               </button>
             </div>
 
@@ -260,13 +270,13 @@ const StudentStaffLogin = () => {
             </AnimatePresence>
 
             <div className="mt-3 flex flex-col items-center gap-4">
-              <Link
-                to="/register"
+              <button
+                onClick={handleRegister}
                 whileHover={{ scale: 1.05 }}
-                className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-emerald-600 hover:text-emerald-700 transition-colors bg-emerald-50 px-6 py-2 rounded-full"
+                className="text-[11px] font-extrabold uppercase cursor-pointer tracking-[0.2em] text-emerald-600 hover:text-emerald-700 transition-colors bg-emerald-50 px-6 py-2 rounded-full"
               >
-            <Typography>New here? Create Account</Typography>    
-              </Link>
+                <Typography>New here? Create Account</Typography>
+              </button>
             </div>
           </div>
         </div>

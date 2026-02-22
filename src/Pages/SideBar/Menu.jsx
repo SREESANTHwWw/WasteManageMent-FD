@@ -26,12 +26,7 @@ const menu = [
     icon: MdOutlineDashboard,
     roles: [ "staff", "admin"],
   },
-  {
-    title: "Login",
-    url: "/login",
-    icon: MdLogin,
-    roles: ["guest"],
-  },
+
 
     {
     title: "Waste",

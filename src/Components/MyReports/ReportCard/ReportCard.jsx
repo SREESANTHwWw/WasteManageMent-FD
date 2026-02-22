@@ -63,7 +63,7 @@ const ReportCard = ({ report, index }) => {
       {/* IMAGE */}
       <div className="relative h-56 overflow-hidden">
         <img
-          src={report?.wasteImage}
+          src={report?.wasteImage[0]}
           alt="Waste"
           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
         />

@@ -7,9 +7,9 @@ import api from "../../Api/APi";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-const Register = () => {
+const Register = ({ onclose ,setLoginOpen}) => {
   const [isAdmin, setIsAdmin] = useState(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const {
     control,
@@ -27,51 +27,54 @@ const Register = () => {
     },
   });
 
-const onSubmit = async (data) => {
-  try {
-    let payload;
-    let res;
-
-    if (!isAdmin) {
-      // Student
-      payload = {
-        fullName: data.fullName,
-        email: data.email,
-        admissionNumber: data.admissionNumber,
-        dateOfBirth: data.dateOfBirth,
-      };
-
-      res = await api.post("/create/student", payload);
-
-      if (res.data?.success) {
-        toast.success("Student Account Created 🎉");
-      }
-    } else {
-      // Staff
-      payload = {
-        fullName: data.fullName,
-        email: data.email,
-        staffID: data.staffID,
-        dateOfBirth: data.dateOfBirth,
-      };
-
-      res = await api.post("/create/staff", payload);
-
-      if (res.data?.success) {
-        toast.success("Staff Account Created 🎉");
-      }
-    }
-
-    reset();
-    navigate("/")
-  } catch (error) {
-    toast.error(
-      error.response?.data?.msg || "Something went wrong"
-    );
-    console.error(error);
+  const handleLoginOpen = ()=>{
+setLoginOpen(true)
+onclose()
   }
-};
 
+  const onSubmit = async (data) => {
+    try {
+      let payload;
+      let res;
+
+      if (!isAdmin) {
+        // Student
+        payload = {
+          fullName: data.fullName,
+          email: data.email,
+          admissionNumber: data.admissionNumber,
+          dateOfBirth: data.dateOfBirth,
+        };
+
+        res = await api.post("/create/student", payload);
+
+        if (res.data?.success) {
+          toast.success("Student Account Created 🎉");
+        }
+      } else {
+        // Staff
+        payload = {
+          fullName: data.fullName,
+          email: data.email,
+          staffID: data.staffID,
+          dateOfBirth: data.dateOfBirth,
+        };
+
+        res = await api.post("/create/staff", payload);
+
+        if (res.data?.success) {
+          toast.success("Staff Account Created 🎉");
+        }
+      }
+
+      reset();
+     setLoginOpen(true)
+     onclose()
+    } catch (error) {
+      toast.error(error.response?.data?.msg || "Something went wrong");
+      console.error(error);
+    }
+  };
 
   const toggleRole = (val) => {
     setIsAdmin(val);
@@ -84,7 +87,7 @@ const onSubmit = async (data) => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4 bg-gray-50/50">
+    <div className="flex items-center fixed inset-0 z-50 backdrop-blur-2xl  justify-center min-h-screen p-4 bg-black/50">
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 30 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -106,7 +109,7 @@ const onSubmit = async (data) => {
             >
               <Leaf size={32} className="text-white" />
             </motion.div>
-            < Typography  className="text-4xl font-bold mb-4 tracking-tight leading-tight">
+            <Typography className="text-4xl font-bold mb-4 tracking-tight leading-tight">
               {isAdmin ? "Staff \nOnboarding" : "Student \nRegistration"}
             </Typography>
             <Typography className="opacity-90 text-lg leading-relaxed max-w-xs">
@@ -117,7 +120,7 @@ const onSubmit = async (data) => {
           </div>
 
           <div className="z-10 text-xs font-medium opacity-60 tracking-widest uppercase">
-         <Typography> © 2026 Emerald Eco • Secure Portal</Typography>  
+            <Typography> © 2026 Emerald Eco • Secure Portal</Typography>
           </div>
 
           <motion.div
@@ -129,8 +132,16 @@ const onSubmit = async (data) => {
 
         {/* Right Side: Form */}
         <div className="md:w-7/12 p-8 md:p-8 flex flex-col justify-center bg-white relative">
+          <button
+            onClick={onclose}
+            className="absolute top-6 right-6 p-2 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all cursor-pointer z-20"
+          >
+            <X size={24} />
+          </button>
           <div className="mb-8 flex flex-col">
-            <Typography className="text-3xl font-bold text-gray-800">Create Account</Typography>
+            <Typography className="text-3xl font-bold text-gray-800">
+              Create Account
+            </Typography>
             <Typography className="text-gray-400 mt-2 font-medium">
               Join the sustainable learning movement.
             </Typography>
@@ -149,7 +160,8 @@ const onSubmit = async (data) => {
               onClick={() => toggleRole(false)}
               className={`flex-1 py-2.5 z-10 text-xs font-bold cursor-pointer uppercase tracking-wider transition-colors duration-300 flex items-center justify-center gap-2 ${!isAdmin ? "text-emerald-600" : "text-gray-400"}`}
             >
-              <GraduationCap size={14} /><Typography>Student</Typography> 
+              <GraduationCap size={14} />
+              <Typography>Student</Typography>
             </button>
             <button
               type="button"
@@ -246,21 +258,23 @@ const onSubmit = async (data) => {
                   className="w-full text-white font-bold py-4 cursor-pointer rounded-2xl shadow-xl transition-all uppercase tracking-[0.2em] text-xs"
                   style={{ backgroundColor: "var(--main-web-color, #059669)" }}
                 >
-                <Typography>Create Account</Typography>  
+                  <Typography>Create Account</Typography>
                 </motion.button>
               </motion.div>
             </motion.form>
           </AnimatePresence>
 
           <div className="mt-8 text-center text-xs font-bold uppercase tracking-widest">
-            <Typography Account className="text-gray-400">Already a member? </Typography>
-            <Link
-              to="/login"
-              className="hover:underline transition-all"
+            <Typography Account className="text-gray-400">
+              Already a member?{" "}
+            </Typography>
+            <button
+               onClick={handleLoginOpen}
+              className="hover:underline transition-all cursor-pointer text-xl"
               style={{ color: "var(--main-web-color, #059669)" }}
             >
-            <Typography>Log In</Typography>  
-            </Link>
+              <Typography>Log In</Typography>
+            </button>
           </div>
         </div>
       </motion.div>
