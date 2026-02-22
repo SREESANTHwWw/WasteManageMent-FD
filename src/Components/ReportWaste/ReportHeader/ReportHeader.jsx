@@ -12,7 +12,7 @@ const ReportHeader = ({ user }) => {
             Environmental Protocol
           </Typography>
         </div>
-        <Typography className="text-5xl font-black text-slate-900 tracking-tight">
+        <Typography className="text-3xl font-black text-slate-900 tracking-tight">
           Submit{" "}
           <span className="text-emerald-500 underline decoration-slate-200 underline-offset-8">
             Report

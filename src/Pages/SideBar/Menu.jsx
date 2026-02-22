@@ -18,7 +18,13 @@ const menu = [
     title: "Overview",
     url: "/",
     icon: MdOutlineDashboard,
-    roles: ["guest", "student", "staff", "admin"],
+    roles: ["guest", "student", "admin"],
+  },
+  {
+    title: "Overview",
+   url: "/dashboard/staffoverview",
+    icon: MdOutlineDashboard,
+    roles: [ "staff", "admin"],
   },
   {
     title: "Login",
@@ -27,18 +33,25 @@ const menu = [
     roles: ["guest"],
   },
 
+    {
+    title: "Waste",
+    url: "/dashboard/wastereports",
+    icon: MdOutlineAnalytics,
+    roles: ["staff", "admin"],
+  },
+
   // Student
   {
-    title: "Report Waste",
+    title: "Report New Waste",
     url: "/dashboard/reportwaste",
     icon: MdOutlineAssignment,
-    roles: ["student"],
+    roles: ["student","staff"],
   },
   {
     title: "My Reports",
     url: "/dashboard/myreports",
     icon: MdHistory,
-    roles: ["student","guest"],
+    roles: ["student","guest","staff"],
   },
   {
     title: "My Rank",
@@ -60,12 +73,7 @@ const menu = [
     icon: MdOutlineLocationOn,
     roles: ["staff", "admin"],
   },
-  {
-    title: "Impact Analytics",
-    url: "/dashboard/analytics",
-    icon: MdOutlineAnalytics,
-    roles: ["staff", "admin"],
-  },
+
 
   // Admin
   {

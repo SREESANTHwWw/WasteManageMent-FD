@@ -8,6 +8,8 @@ import LoadingState from "./@All/LoadingScreens/MainLoading";
 import Error404 from "./@All/404/Page404";
 import CampusRank from "./Components/CampusRank/CampusRank";
 import RewardGate from "./Components/Reward/Reward";
+import WasteReports from "./Components/WasteReports/WasteReports";
+import StaffOverview from "./Components/StaffOverView/StaffOverView";
 
 // Lazy imports
 const HomeLayout = lazy(() => import("./Pages/Layout/HomeLayout"));
@@ -57,6 +59,8 @@ const App = () => {
               <Route path="myreports" element={<MyReports />} />
               <Route path="myrank" element={<CampusRank />} />
               <Route path="rewards" element={<RewardGate/>}/>
+              <Route path="wastereports" element ={<WasteReports/>}/>
+              <Route path="staffoverview" element = {<StaffOverview/>}/>
             </Route>
 
             {/* 404 */}

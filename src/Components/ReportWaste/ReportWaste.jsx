@@ -111,6 +111,7 @@ const ReportWaste = () => {
       setIsSubmitting(true);
       const formData = new FormData();
       formData.append("wasteLocation", data.location);
+      formData.append("wasteQty", data.wasteQty);
       formData.append("description", data.description || "");
       formData.append(
         "landmark",
@@ -145,10 +146,10 @@ const ReportWaste = () => {
 
   return (
     <div className="h-full  ">
-      <ReportHeader user={user} />
+      {/* <ReportHeader user={user} /> */}
       <div className="max-w-5xl  mx-auto">
         {/* Progress Bar */}
-        <div className="mb-4 relative">
+        <div className="mb-2 relative">
           <div className="flex justify-between relative z-10">
             {[1, 2, 3].map((num) => (
               <div key={num} className="flex flex-col items-center gap-2">
@@ -161,11 +162,11 @@ const ReportWaste = () => {
                 >
                   {step > num ? <CheckCircle2 size={20} /> : num}
                 </div>
-                <span
+                <Typography
                   className={`text-[10px] font-black uppercase tracking-widest ${step >= num ? "text-emerald-600" : "text-slate-300"}`}
                 >
                   {num === 1 ? "Site" : num === 2 ? "Type" : "Proof"}
-                </span>
+                </Typography>
               </div>
             ))}
           </div>
@@ -331,12 +332,7 @@ const ReportWaste = () => {
           </div>
         </form>
 
-        <div className="mt-8 text-center">
-          <Typography className="text-xs text-slate-400 font-medium">
-            Reports are verified by AI. Misleading reports may result in point
-            deductions.
-          </Typography>
-        </div>
+       
       </div>
 
       <ReportNotification showModal={showModal} closeModal={resetAll} />

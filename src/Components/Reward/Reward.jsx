@@ -19,7 +19,7 @@ const RewardGate = () => {
   const progressPercent = Math.min((userPoints / THRESHOLD) * 100, 100);
 
   return (
-    <div className="flex w-full justify-center items-center min-h-[700px] p-6">
+    <div className="flex w-full justify-center items-center min-h-full p-6">
       <AnimatePresence mode="wait">
         {isUnlocked ? (
           /* --- UNLOCKED STATE: MAX WIDTH 7XL --- */
@@ -28,10 +28,10 @@ const RewardGate = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 1.05 }}
-            className="relative w-full max-w-7xl bg-white border-[16px] border-double border-slate-100 p-16 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] rounded-[3rem] overflow-hidden"
+            className="relative w-full max-w-7xl bg-white border-16 border-double border-slate-100 p-1 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] rounded-[3rem] overflow-hidden"
           >
             {/* Background Flair */}
-            <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-yellow-500 via-amber-200 to-yellow-500" />
+            <div className="absolute top-0 left-0 w-full h-3 bg-linear-to-r from-yellow-500 via-amber-200 to-yellow-500" />
             
             <div className="grid lg:grid-cols-12 gap-12 items-center">
               {/* Left Column: Visual Iconography */}
@@ -43,7 +43,7 @@ const RewardGate = () => {
                   className="relative"
                 >
                   <div className="absolute inset-0 bg-yellow-400 blur-[60px] opacity-20 animate-pulse" />
-                  <div className="relative bg-gradient-to-br from-yellow-400 to-amber-600 p-12 rounded-[2rem] shadow-2xl rotate-3">
+                  <div className="relative bg-linear-to-br from-yellow-400 to-amber-600 p-12 rounded-4xl shadow-2xl rotate-3">
                     <Award size={120} className="text-white" />
                   </div>
                 </motion.div>
@@ -65,10 +65,10 @@ const RewardGate = () => {
                 </Typography>
 
                 <div className="py-4">
-                  <Typography className="text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-600">
+                  <Typography className="text-7xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-slate-900 to-slate-600">
                     {user?.displayName || "Elite Member"}
                   </Typography>
-                  <div className="h-1 w-full max-w-md bg-gradient-to-r from-amber-400 to-transparent mt-4" />
+                  <div className="h-1 w-full max-w-md bg-linear-to-r from-amber-400 to-transparent mt-4" />
                 </div>
 
                 <Typography className="max-w-2xl text-lg text-slate-600 leading-relaxed">
@@ -153,7 +153,7 @@ const RewardGate = () => {
                   initial={{ width: 0 }}
                   animate={{ width: `${progressPercent}%` }}
                   transition={{ duration: 2, ease: "anticipate" }}
-                  className="h-full bg-gradient-to-r from-(--main-web-color) via-(--eco-accent) to-(--main-web-color) rounded-xl relative"
+                  className="h-full bg-linear-to-r from-(--main-web-color) via-(--eco-accent) to-(--main-web-color) rounded-xl relative"
                 >
                   <div className="absolute inset-0 bg-white/30 w-full animate-[shimmer_2s_infinite] skew-x-12" />
                 </motion.div>
