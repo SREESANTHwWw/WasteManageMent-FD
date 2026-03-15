@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Leaf, GraduationCap, ShieldCheck } from "lucide-react";
+import { X, Leaf, GraduationCap, ShieldCheck, ArrowLeft } from "lucide-react";
 import { TextController, Typography } from "../../@All/Tags/Tags";
 import api from "../../Api/APi";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-const Register = ({ onclose ,setLoginOpen}) => {
+const Register = ({ onclose, setLoginOpen }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
 
@@ -27,10 +27,9 @@ const Register = ({ onclose ,setLoginOpen}) => {
     },
   });
 
-  const handleLoginOpen = ()=>{
-setLoginOpen(true)
-onclose()
-  }
+  const handleLoginOpen = () => {
+    navigate("/login");
+  };
 
   const onSubmit = async (data) => {
     try {
@@ -68,8 +67,9 @@ onclose()
       }
 
       reset();
-     setLoginOpen(true)
-     onclose()
+    
+        
+        navigate("/login");
     } catch (error) {
       toast.error(error.response?.data?.msg || "Something went wrong");
       console.error(error);
@@ -87,7 +87,7 @@ onclose()
   };
 
   return (
-    <div className="flex items-center fixed inset-0 z-50 backdrop-blur-2xl  justify-center min-h-screen p-4 bg-black/50">
+    <div className="flex items-center   justify-center  p-2 ">
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 30 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -101,15 +101,23 @@ onclose()
               "var(--eco-gradient, linear-gradient(135deg, #059669 0%, #065f46 100%))",
           }}
         >
-          <div className="z-10 flex flex-col">
+          <div className="z-10 gap-4 flex flex-col">
+            <button
+            onClick={()=>navigate("/")}
+            className="flex items-center gap-2 text-white font-medium hover:opacity-80 transition cursor-pointer">
+              <ArrowLeft size={18} />
+              <span>Back to Home</span>
+            </button>
+
             <motion.div
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-8 border border-white/10"
+              className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-3 border border-white/10"
             >
               <Leaf size={32} className="text-white" />
             </motion.div>
-            <Typography className="text-4xl font-bold mb-4 tracking-tight leading-tight">
+
+            <Typography className="text-4xl font-bold mb-2 tracking-tight leading-tight">
               {isAdmin ? "Staff \nOnboarding" : "Student \nRegistration"}
             </Typography>
             <Typography className="opacity-90 text-lg leading-relaxed max-w-xs">
@@ -132,12 +140,6 @@ onclose()
 
         {/* Right Side: Form */}
         <div className="md:w-7/12 p-8 md:p-8 flex flex-col justify-center bg-white relative">
-          <button
-            onClick={onclose}
-            className="absolute top-6 right-6 p-2 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all cursor-pointer z-20"
-          >
-            <X size={24} />
-          </button>
           <div className="mb-8 flex flex-col">
             <Typography className="text-3xl font-bold text-gray-800">
               Create Account
@@ -269,7 +271,7 @@ onclose()
               Already a member?{" "}
             </Typography>
             <button
-               onClick={handleLoginOpen}
+              onClick={handleLoginOpen}
               className="hover:underline transition-all cursor-pointer text-xl"
               style={{ color: "var(--main-web-color, #059669)" }}
             >

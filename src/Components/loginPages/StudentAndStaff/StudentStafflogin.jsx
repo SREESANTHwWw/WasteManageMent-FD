@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { motion, AnimatePresence } from "framer-motion";
 import { TextController, Typography } from "../../../@All/Tags/Tags";
-import { X, GraduationCap, ShieldCheck } from "lucide-react";
+import { X, GraduationCap, ShieldCheck ,ArrowLeft} from "lucide-react";
 import WasteLogo from "../../../assets/WasteLogo.png";
 import api from "../../../Api/APi";
 import { Link } from "react-router-dom";
@@ -28,8 +28,8 @@ const StudentStaffLogin = ({ onclose,setRegisterOpen }) => {
   });
 
   const handleRegister = ()=>{
-         setRegisterOpen(true)
-         onclose()
+         
+        navigate("/register")
   }
 
   const onSubmit = async (data) => {
@@ -70,9 +70,9 @@ const StudentStaffLogin = ({ onclose,setRegisterOpen }) => {
 
         // optional toast
         toast.success(res.data.msg);
-         onclose()
+        
         // redirect
-        navigate("/");
+        navigate("/dashboard");
       }
     } catch (error) {
       console.error(error);
@@ -92,7 +92,7 @@ const StudentStaffLogin = ({ onclose,setRegisterOpen }) => {
   };
 
   return (
-    <div className=" fixed inset-0 z-50 backdrop-blur-2xl bg-black/50  flex items-center justify-center p-4    ">
+    <div className="  flex items-center justify-center p-7    ">
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -117,8 +117,14 @@ const StudentStaffLogin = ({ onclose,setRegisterOpen }) => {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="z-10 flex flex-col items-start"
+            className="z-10 flex flex-col gap-4 items-start"
           >
+            <button
+            onClick={()=>navigate("/")}
+            className="flex items-center gap-2 text-white font-medium hover:opacity-80 transition cursor-pointer">
+              <ArrowLeft size={18} />
+              <span>Back to Home</span>
+            </button>
             <div className="bg-white backdrop-blur-md p-4 rounded-2xl mb-8 border border-white/20">
               <img
                 src={WasteLogo}
@@ -159,12 +165,7 @@ const StudentStaffLogin = ({ onclose,setRegisterOpen }) => {
         {/* Right Side: Form */}
         <div className="md:w-[55%] p-8 md:p-16 flex flex-col justify-center bg-white relative">
           {/* Close Button */}
-          <button
-            onClick={onclose}
-            className="absolute top-6 right-6 p-2 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all cursor-pointer z-20"
-          >
-            <X size={24} />
-          </button>
+       
 
           <div className="max-w-md mx-auto w-full">
             <header className="mb-10 text-center md:text-left flex flex-col">

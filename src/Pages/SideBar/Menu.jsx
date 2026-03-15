@@ -1,90 +1,143 @@
 import {
   MdOutlineDashboard,
   MdOutlinePeople,
-  MdOutlineSettings,
   MdOutlineLocationOn,
   MdOutlineAnalytics,
   MdOutlineAssignment,
   MdHistory,
-  MdLogin,
+  MdOutlineEmojiEvents,
+  MdOutlineBarChart,
+  MdOutlineFlag,
+  MdOutlineLeaderboard,
 } from "react-icons/md";
-import { RiRecycleLine } from "react-icons/ri";
+import {
+  Leaf,
+  Recycle,
+  Zap,
+  Droplets,
+  TreePine,
+  LayoutDashboard,
+  ClipboardList,
+  FileText,
+  Trophy,
+  Users,
+  MapPin,
+  BarChart2,
+  PlusCircle,
+  ListChecks,
+  Megaphone,
+} from "lucide-react";
+import { RiRecycleLine, RiLeafLine, RiMedalLine, RiMapPin2Line } from "react-icons/ri";
 
 const size = 24;
 
+// Role hierarchy:
+// guest    → public access only
+// student  → guest + student-specific
+// staff    → student + staff-specific (staff has ALL student permissions)
+// admin    → everything
+
 const menu = [
-  // Public (Guest)
+  // ── Overview (everyone) ───────────────────────────────────────
   {
     title: "Overview",
     url: "/",
-    icon: MdOutlineDashboard,
-    roles: ["guest", "student", "admin"],
+    icon: LayoutDashboard,
+    roles: ["guest", "student", "staff", ],
   },
+
+  // ── Waste Reporting (guest + student + staff) ─────────────────
   {
-    title: "Overview",
-   url: "/dashboard/staffoverview",
-    icon: MdOutlineDashboard,
-    roles: [ "staff", "admin"],
-  },
-
-
-    {
-    title: "Waste",
-    url: "/dashboard/wastereports",
-    icon: MdOutlineAnalytics,
-    roles: ["staff", "admin"],
-  },
-
-  // Student
-  {
-    title: "Report New Waste",
+    title: "Report Waste",
     url: "/dashboard/reportwaste",
-    icon: MdOutlineAssignment,
-    roles: ["student","staff"],
+    icon: PlusCircle,
+    roles: ["guest", "student", "staff", ],
   },
+
+  // ── My Activity (student + staff share same access) ───────────
   {
     title: "My Reports",
     url: "/dashboard/myreports",
-    icon: MdHistory,
-    roles: ["student","guest","staff"],
+    icon: ClipboardList,
+    roles: ["student", "staff", ],
+  },
+  {
+    title: "All Waste Reports",
+    url: "/dashboard/wastereports",
+    icon: FileText,
+    roles: ["staff", ],
+  },
+    {
+    title: "Campaigns",
+    url: "/dashboard/campaigns",
+    icon: ClipboardList,
+    roles: ["student", "staff","guest" ],
   },
   {
     title: "My Rank",
     url: "/dashboard/myrank",
-    icon: MdHistory,
-    roles: ["student","guest"],
+    icon: MdOutlineLeaderboard,
+    roles: ["student", "staff", ],
   },
   {
     title: "Rewards",
     url: "/dashboard/rewards",
-    icon: RiRecycleLine,
-    roles: ["student"],
+    icon: RiMedalLine,
+    roles: ["student", "staff", ],
   },
 
-  // Staff/Admin
-  {
-    title: "Collected Waste",
-    url: "/dashboard/bins",
-    icon: MdOutlineLocationOn,
-    roles: ["staff", "admin"],
-  },
+  // ── Staff-level (staff + admin) ───────────────────────────────
 
+  // {
+  //   title: "Eco Collected",
+  //   url: "/dashboard/bins",
+  //   icon: RiMapPin2Line,
+  //   roles: ["staff", "admin"],
+  // },
 
-  // Admin
+  // ── Admin only ────────────────────────────────────────────────
   {
-    title: "Campus Users",
-    url: "/dashboard/users",
-    icon: MdOutlinePeople,
+    title: "Analytics",
+    url: "/admin",
+    icon: BarChart2,
     roles: ["admin"],
   },
-
-  // Common (logged-in)
-  // {
-  //   title: "Settings",
-  //   url: "/dashboard/settings",
-  //   icon: MdOutlineSettings,
-  //   roles: ["student", "staff", "admin"],
-  // },
+    {
+    title: "All Waste Reports",
+    url: "/admin/allwaste",
+    icon: FileText,
+    roles: [ "admin"],
+  },
+  {
+    title: "All Staffs",
+    url: "/admin/allstaffs",
+    icon: Users,
+    roles: ["admin"],
+  },
+   {
+    title: "All Students",
+    url: "/admin/allstudents",
+    icon: Users,
+    roles: ["admin"],
+  },
+  {
+    title: "Create Campaign",
+    url: "/admin/campaignform",
+    icon: Megaphone,
+    roles: ["admin"],
+  },
+  {
+    title: "All Campaigns",
+    url: "/admin/allcampaign",
+    icon: ListChecks,
+    roles: ["admin"],
+  },
+    {
+    title: "Cleaning Staff",
+    url: "/admin/cleaingstaff",
+    icon: ListChecks,
+    roles: ["admin"],
+  },
 ];
 
 export { size };

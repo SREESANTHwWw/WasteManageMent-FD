@@ -22,7 +22,7 @@ import { useNavigate } from "react-router-dom";
 
 
 const StaffOverView = () => {
-  const { user } = useAuth();
+ const { user, refreshUser } = useAuth();
  const navigate =useNavigate()
   const [reports ,setReports] = useState([])
   const [status, setStatus] = useState("OFFLINE");
@@ -87,11 +87,7 @@ const statsData = useMemo(() => {
   ];
 }, [statusSummary]);
   
-  const recentReports = [
-    { id: "REP-992", location: "Central Library", time: "2 mins ago", status: "In Review", type: "Plastic" },
-    { id: "REP-881", location: "Main Canteen", time: "1 hour ago", status: "Verified", type: "Organic" },
-    { id: "REP-776", location: "Sports Complex", time: "3 hours ago", status: "Verified", type: "Paper" },
-  ];
+
 
   const isOnline = status === "ONLINE";
   const isInWork = status === "IN_WORK";
@@ -116,32 +112,32 @@ const statsData = useMemo(() => {
   }, [status]);
 
 
-  const handleOnlineToggle = async () => {
-    try {
-      if (loadingStatus) return;
+const handleOnlineToggle = async () => {
+  try {
+    if (loadingStatus) return;
+    if (status === "IN_WORK") return;
 
-    
-      if (status === "IN_WORK") return;
+    setLoadingStatus(true);
 
-      setLoadingStatus(true);
+    const newStatus = status === "ONLINE" ? "OFFLINE" : "ONLINE";
 
-      const newStatus = status === "ONLINE" ? "OFFLINE" : "ONLINE";
+    // optimistic UI
+    setStatus(newStatus);
 
-      const res = await api.patch("/staff/status", { status: newStatus });
+    await api.patch("/staff/status", { status: newStatus });
 
-     
-      const updatedStatus = res?.data?.status || res?.data?.user?.status || newStatus;
-      setStatus(updatedStatus);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoadingStatus(false);
-    }
-  };
+    // ✅ sync global user (so navigation won't reset)
+    await refreshUser(); 
+  } catch (err) {
+    console.log(err);
+    // rollback if needed
+    fetchMyStatus();
+  } finally {
+    setLoadingStatus(false);
+  }
+};
 
-  const  stat = [ {
-
-  }]
+  
 
 
   return (

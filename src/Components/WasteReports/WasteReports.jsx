@@ -7,19 +7,20 @@ import FilterTab from "./FilterTab/FilterTab";
 import StaffReportCard from "./StaffReportCard/StaffReportCard";
 import StaffCleanupModal from "./UploadImageProof/UploadImageProof";
 import ReportDetailsModal from "./ReportDetailsModal/ReportDetailsModal";
+import TaskTakenMode from "./ReportDetailsModal/TaskTakenMode";
 
 const WasteReports = () => {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-
+  const [takeTaskOpen, setTakeTaskOpen] = useState(false);
 
   const [viewModal, setViewModal] = useState(false);
-const [viewReport, setViewReport] = useState(null);
-const openView = (report) => {
-  setViewReport(report);
-  setViewModal(true);
-};
+  const [viewReport, setViewReport] = useState(null);
+  const openView = (report) => {
+    setViewReport(report);
+    setViewModal(true);
+  };
 
   // Modal States
   const [resolveTab, setResolveTab] = useState(false);
@@ -64,6 +65,10 @@ const openView = (report) => {
     setSelectedReport(report);
     setResolveTab(true);
   };
+  const handleTakeTaskOpen = (report) => {
+    setSelectedReport(report);
+    setTakeTaskOpen(true);
+  }
 
   // Image Handling
   const handleImageUpload = (e) => {
@@ -121,6 +126,7 @@ const openView = (report) => {
       setIsSubmitting(false);
     }
   };
+  console.log(selectedReport?._id);
 
   return (
     <div className="min-h-screen bg-[#FDFDFD] text-slate-900 font-sans overflow-x-hidden">
@@ -138,26 +144,38 @@ const openView = (report) => {
             imagePreviews={imagePreviews}
             handleImageUpload={handleImageUpload}
             removeImage={removeImage}
-            areaName={selectedReport?.wasteLocation  || "Unknown Sector"}
+            areaName={selectedReport?.wasteLocation || "Unknown Sector"}
             taskType={selectedReport?.userId.fullName || "General Cleanup"}
             onSubmit={handleFinalSubmit}
             isSubmitting={isSubmitting}
           />
         )}
       </AnimatePresence>
+      <AnimatePresence>
+        {takeTaskOpen && (
+          <TaskTakenMode
+            reportId={selectedReport?._id}
+            onSuccess={() => {
+              setTakeTaskOpen(false);
+              fetchReports();
+            }}
+            onClose={() => setTakeTaskOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
-  {viewModal && (
-    <ReportDetailsModal
-      isOpen={viewModal}
-      onClose={() => {
-        setViewModal(false);
-        setViewReport(null);
-      }}
-      report={viewReport}
-    />
-  )}
-</AnimatePresence>
+        {viewModal && (
+          <ReportDetailsModal
+            isOpen={viewModal}
+            onClose={() => {
+              setViewModal(false);
+              setViewReport(null);
+            }}
+            report={viewReport}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Header Area */}
       <div className="max-w-7xl mx-auto px-6 pt-10 pb-6 border-b border-slate-100">
@@ -169,7 +187,7 @@ const openView = (report) => {
                 size={32}
               />
               <Typography className="text-2xl font-black text-slate-900 tracking-tighter uppercase">
-                Eco-Track
+                All Waste Reports
               </Typography>
             </div>
             <Typography className="text-slate-400 text-sm font-medium">
@@ -210,8 +228,9 @@ const openView = (report) => {
                 <StaffReportCard
                   key={report._id}
                   report={report}
+                  handleTakeTaskOpen={()=> handleTakeTaskOpen(report)}
                   onUpdate={() => handleOpenResolveModal(report)}
-                  openView={()=> openView(report)}
+                  openView={() => openView(report)}
                 />
               ))}
             </AnimatePresence>

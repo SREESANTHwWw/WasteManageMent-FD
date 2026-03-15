@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import {
   Bell,
@@ -20,17 +20,17 @@ import Register from "../../Components/Register/Register";
 const HomeLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout } = useAuth();
+  const { logout, user ,loginOpen,setLoginOpen } = useAuth();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
-  const [registerOpen ,setRegisterOpen] =useState(false)
-
+  
+  const [registerOpen, setRegisterOpen] = useState(false);
 
   // Auth & User Data
   const token = localStorage.getItem("token");
-  const userData =JSON.parse(localStorage.getItem("user") || "{}") || defaultUSer;
-  const { user } = useAuth();
+  const userData =
+    JSON.parse(localStorage.getItem("user") || "{}") || defaultUSer;
+
   // Reward Points Logic (assuming 'points' exists in your user object)
   const rewardPoints = user?.rewardPoint || 0;
 
@@ -60,8 +60,18 @@ const HomeLayout = () => {
         user={userData}
       />
 
-      {loginOpen && <StudentStaffLogin onclose={() => setLoginOpen(false)} setRegisterOpen={setRegisterOpen} />}
-        {registerOpen && <Register onclose={() => setRegisterOpen(false)}  setLoginOpen={setLoginOpen}  />  }
+      {/* {loginOpen && (
+        <StudentStaffLogin
+          onclose={() => setLoginOpen(false)}
+          setRegisterOpen={setRegisterOpen}
+        />
+      )}
+      {registerOpen && (
+        <Register
+          onclose={() => setRegisterOpen(false)}
+          setLoginOpen={setLoginOpen}
+        />
+      )} */}
 
       {/* TOP NAVBAR */}
       <motion.header
@@ -91,38 +101,64 @@ const HomeLayout = () => {
         </div>
 
         {/* LOGO SECTION */}
-        <div className="flex items-center gap-3 select-none">
-          <motion.div
-            initial={{ rotate: -20, scale: 0 }}
-            animate={{ rotate: 0, scale: 1 }}
-            transition={{ type: "spring", stiffness: 200, damping: 15 }}
-            className="bg-emerald-100 p-2 rounded-xl"
-          >
-            <span className="text-xl">🌿</span>
-          </motion.div>
 
-          <div className="flex flex-col">
-            <Typography className="text-xl md:text-2xl font-black tracking-tighter leading-none bg-linear-to-r from-emerald-600 via-emerald-500 to-teal-600 bg-clip-text text-transparent italic">
-              Green Campus
-            </Typography>
-            <div className="flex items-center gap-1">
-              <div className="h-px w-4 bg-emerald-200" />
-              <Typography className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-400">
-                Eco-System
+        {user?.role === "staff" ? (
+          <div className="flex items-center gap-3 select-none">
+            <motion.div
+              initial={{ rotate: -20, scale: 0 }}
+              animate={{ rotate: 0, scale: 1 }}
+              transition={{ type: "spring", stiffness: 200, damping: 15 }}
+              className="bg-blue-100 p-2 rounded-xl shadow-md"
+            >
+              <span className="text-xl">🛡️</span>
+            </motion.div>
+
+            <div className="flex flex-col">
+              <Typography className="text-xl md:text-2xl font-black tracking-tight leading-none bg-linear-to-r from-blue-600 via-indigo-500 to-slate-600 bg-clip-text text-transparent">
+                Green Campus
               </Typography>
+
+              <div className="flex items-center gap-1">
+                <div className="h-px w-6 bg-blue-300" />
+                <Typography className="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-500">
+                  Operations Panel
+                </Typography>
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex items-center gap-3 select-none">
+            <motion.div
+              initial={{ rotate: -20, scale: 0 }}
+              animate={{ rotate: 0, scale: 1 }}
+              transition={{ type: "spring", stiffness: 200, damping: 15 }}
+              className="bg-emerald-100 p-2 rounded-xl"
+            >
+              <span className="text-xl">🌿</span>
+            </motion.div>
 
-        {/* ACTIONS SECTION */}
+            <div className="flex flex-col">
+              <Typography className="text-xl md:text-2xl font-black tracking-tighter leading-none bg-linear-to-r from-emerald-600 via-emerald-500 to-teal-600 bg-clip-text text-transparent italic">
+                Green Campus
+              </Typography>
+
+              <div className="flex items-center gap-1">
+                <div className="h-px w-4 bg-emerald-200" />
+                <Typography className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-400">
+                  Eco-System
+                </Typography>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center gap-3 md:gap-6">
-          {/* REWARD POINTS BADGE */}
           {token && (
             <motion.div
               whileHover={{ scale: 1.05 }}
               className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 px-2 md:px-3 py-1.5 rounded-2xl"
             >
-              <div className="bg-emerald-500 p-1 rounded-lg shadow-sm">
+              <div className={`bg-emerald-500 p-1 rounded-lg shadow-sm`}>
                 <Trophy size={14} className="text-white" />
               </div>
               <div className="flex flex-col justify-center leading-none">
@@ -145,7 +181,7 @@ const HomeLayout = () => {
           <div className="relative">
             {!token ? (
               <button
-                onClick={() => setLoginOpen(true)}
+                onClick={() => navigate("/login")}
                 className="px-6 h-9 bg-emerald-600 hover:bg-emerald-700 shadow-lg font-semibold cursor-pointer rounded-lg text-white transition-all"
               >
                 <Typography> Login </Typography>
@@ -175,19 +211,18 @@ const HomeLayout = () => {
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
                       className="absolute right-0 mt-3 w-56 bg-white border border-slate-100 shadow-2xl rounded-2xl py-2 z-50 origin-top-right"
                     >
-                      <div className="px-4 py-2 border-b border-slate-50 mb-1">
-                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                      <div className="px-4 py-2 border-b border-slate-50 mb-1 flex flex-col gap-1">
+                        <Typography className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
                           Account
-                        </p>
-                        <p className="text-sm font-bold text-slate-700 truncate">
+                        </Typography>
+                        <Typography className="text-sm font-bold text-slate-700 truncate">
                           {user?.fullName}
-                        </p>
+                        </Typography>
                       </div>
 
                       <button
                         onClick={() => {
                           logout();
-                          
                         }}
                         className="flex cursor-pointer items-center gap-3 w-full px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
                       >

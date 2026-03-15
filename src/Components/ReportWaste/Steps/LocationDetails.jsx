@@ -1,13 +1,21 @@
-import React from 'react'
-import { OptionController, TextController, Typography } from '../../../@All/Tags/Tags'
+import React from "react";
+import {
+  OptionController,
+  TextController,
+  Typography,
+} from "../../../@All/Tags/Tags";
 import {
   Info,
   Scale, // Added a relevant icon
 } from "lucide-react";
 import { motion } from "framer-motion";
 
-const LocationDetails = ({ control, errors, locationOptions, currentLocation }) => {
-
+const LocationDetails = ({
+  control,
+  errors,
+  locationOptions,
+  currentLocation,
+}) => {
   // Define the Quantity options based on your Enum
   const quantityOptions = [
     { label: "Small (Handful)", value: "SMALL" },
@@ -31,60 +39,61 @@ const LocationDetails = ({ control, errors, locationOptions, currentLocation }) 
           Select the campus zone and estimate the waste volume.
         </Typography>
       </div>
-      <div className='grid grid-cols-2 gap-2'>
-
-   
-      {/* Campus Zone */}
-      <OptionController
-        name="location"
-        label="Campus Zone"
-        control={control}
-        errors={errors}
-        options={locationOptions}
-        className="bg-slate-50 border-none h-14 rounded-2xl"
-      />
-
-      {/* Landmark (Only if Others) */}
-      {currentLocation === "OTHERS" && (
-        <TextController
-          name="landmark"
-          label="Specific Landmark"
-          placeholder="e.g. Near the main entrance"
+      <div className="grid grid-cols-2 gap-2">
+        {/* Campus Zone */}
+        <OptionController
+          name="location"
+          label="Campus Zone"
           control={control}
           errors={errors}
+          options={locationOptions}
           className="bg-slate-50 border-none h-14 rounded-2xl"
         />
-      )}
 
-      {/* Waste Quantity (The New Section) */}
-      <OptionController
-        name="wasteQty"
-        label="Waste Quantity"
-        control={control}
-        errors={errors}
-        options={quantityOptions}
-        className="bg-slate-50 border-none h-14 rounded-2xl"
-      />
+        {/* Landmark (Only if Others) */}
+        {currentLocation === "OTHERS" && (
+          <TextController
+            type="text"
+            name="landmark"
+            label="Specific Landmark"
+            placeholder="e.g. Near the main entrance"
+            control={control}
+            errors={errors}
+            className=""
+          />
+        )}
 
-      {/* Waste Description */}
-      <TextController
-        name="description"
-        label="Waste Description"
-        placeholder="Describe the type or condition of the waste"
-        control={control}
-        errors={errors}
-        className="bg-slate-50 border-none h-14 rounded-2xl"
-      />
-   </div>
+        {/* Waste Quantity (The New Section) */}
+        <OptionController
+          name="wasteQty"
+          label="Waste Quantity"
+          control={control}
+          errors={errors}
+          options={quantityOptions}
+          className="bg-slate-50 border-none h-14 rounded-2xl"
+        />
+
+        {/* Waste Description */}
+        <TextController
+          type="textarea"
+          rows={2}
+          name="description"
+          label="Waste Description"
+          placeholder="Describe the type or condition of the waste"
+          control={control}
+          errors={errors}
+          className=""
+        />
+      </div>
       <div className="p-2 bg-emerald-50 rounded-2xl border border-emerald-100 flex gap-3">
         <Info className="text-emerald-500 shrink-0" size={18} />
         <Typography className="text-xs text-emerald-700 leading-relaxed">
-          Accurate locations and size estimates help our cleanup teams earn points
-          faster and keep the campus green.
+          Accurate locations and size estimates help our cleanup teams earn
+          points faster and keep the campus green.
         </Typography>
       </div>
     </motion.div>
-  )
-}
+  );
+};
 
-export default LocationDetails
+export default LocationDetails;

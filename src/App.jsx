@@ -3,69 +3,149 @@ import { Suspense, lazy } from "react";
 import { Toaster } from "react-hot-toast";
 
 import ProtectedRoute from "./Components/ProtectRoute/ProtectRoue";
-import PublicRoute from "./Components/ProtectRoute/PublicRoute";
 import LoadingState from "./@All/LoadingScreens/MainLoading";
 import Error404 from "./@All/404/Page404";
 import CampusRank from "./Components/CampusRank/CampusRank";
 import RewardGate from "./Components/Reward/Reward";
 import WasteReports from "./Components/WasteReports/WasteReports";
 import StaffOverview from "./Components/StaffOverView/StaffOverView";
+import { useAuth } from "./Components/Context/UserContext/UserContext";
+import RoleBaseDashboard from "./Components/ProtectRoute/RoleBaseDashboard";
+import AdminLayout from "./Pages/Layout/AdminLayout";
+import AdminLoginPage from "./Components/loginPages/AdminLoginPage";
+import ProtectedAdminRoute from "./Components/ProtectRoute/ProtectedAdminRoute";
+import EcoAnalytics from "./Components/AdminComp/EcoAnalytics/EcoAnalytics";
+import CampaignForm from "./Components/AdminComp/CampaignForm/CampaignForm";
+import AllCampaigns from "./Components/AdminComp/CampaignForm/AllCampaigns";
+import AllStaffs from "./Components/AdminComp/Allstaffs/AllStaffs";
+import AllStudents from "./Components/AdminComp/AllStudent/AllStudents";
+import CleaningStaffAdmin from "./Components/AdminComp/CleaningStaffs/CleaningStaffAdmin";
+import CampaignsPage from "./Components/Usercampaign/CampaignsPage";
+import AdminWasteReports from "./Components/AdminComp/AllWasterReportsAdmin/AdminWasteReports";
 
 // Lazy imports
 const HomeLayout = lazy(() => import("./Pages/Layout/HomeLayout"));
 const Overview = lazy(() => import("./Components/OverView/Overview"));
 const ReportWaste = lazy(() => import("./Components/ReportWaste/ReportWaste"));
-const StudentStaffLogin = lazy(() =>
-  import("./Components/loginPages/StudentAndStaff/StudentStafflogin")
+const StudentStaffLogin = lazy(
+  () => import("./Components/loginPages/StudentAndStaff/StudentStafflogin")
 );
 const Register = lazy(() => import("./Components/Register/Register"));
 const MyReports = lazy(() => import("./Components/MyReports/MyReports"));
 
 const App = () => {
+  const { user } = useAuth();
+
   return (
     <>
       <BrowserRouter>
         <Suspense fallback={<LoadingState />}>
           <Routes>
-
-            {/* 🔓 Public Home */}
+            {/* PUBLIC / GUEST ROUTES */}
+             <Route path="/login" element={<StudentStaffLogin />} />
+              <Route path="/register" element={<Register />} />
             <Route path="/" element={<HomeLayout />}>
-              <Route index element={<Overview />} />
+              <Route index element={<Overview/>} />
+             
+
+              {/* guest also can report waste */}
+              <Route path="reportwaste" element={<ReportWaste />} />
             </Route>
 
-            {/* 🔓 Public Login */}
-            <Route
-              path="/login"
-              element={
-                <PublicRoute>
-                  <StudentStaffLogin />
-                </PublicRoute>
-              }
-            />
+            {/* USER DASHBOARD ROUTES */}
+            <Route path="/dashboard" element={<HomeLayout />}>
+              {/* student + staff only */}
+              <Route
+                index
+                element={
+                  <ProtectedRoute allowedRoles={["student", "staff"]}>
+                     <Overview />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route path="/register" element={<Register />} />
+              {/* guest can also access report waste */}
+              <Route path="reportwaste" element={<ReportWaste />} />
 
-            {/* 🔐 Protected Dashboard */}
+              {/* student + staff only */}
+              <Route
+                path="myreports"
+                element={
+                  <ProtectedRoute allowedRoles={["student", "staff"]}>
+                    <MyReports />
+                  </ProtectedRoute>
+                }
+              />
+               <Route
+                path="campaigns"
+                element={
+                  <ProtectedRoute allowedRoles={["student", "staff"]}>
+                    <CampaignsPage/>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="myrank"
+                element={
+                  <ProtectedRoute allowedRoles={["student", "staff"]}>
+                    <CampusRank />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="rewards"
+                element={
+                  <ProtectedRoute allowedRoles={["student", "staff"]}>
+                    <RewardGate />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* staff only */}
+              <Route
+                path="wastereports"
+                element={
+                  <ProtectedRoute allowedRoles={["staff"]}>
+                    <WasteReports />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="staffoverview"
+                element={
+                  <ProtectedRoute allowedRoles={["staff"]}>
+                    <StaffOverview />
+                  </ProtectedRoute>
+                }
+              />
+            </Route>
+
+            {/* ADMIN */}
+            <Route path="/admin/login" element={<AdminLoginPage />} />
+
             <Route
-              path="/dashboard"
+              path="/admin"
               element={
-                <ProtectedRoute>
-                  <HomeLayout />
-                </ProtectedRoute>
+                <ProtectedAdminRoute>
+                  <AdminLayout />
+                </ProtectedAdminRoute>
               }
             >
-              <Route index element={<Overview />} />
-              <Route path="reportwaste" element={<ReportWaste />} />
-              <Route path="myreports" element={<MyReports />} />
-              <Route path="myrank" element={<CampusRank />} />
-              <Route path="rewards" element={<RewardGate/>}/>
-              <Route path="wastereports" element ={<WasteReports/>}/>
-              <Route path="staffoverview" element = {<StaffOverview/>}/>
+              <Route index element={<EcoAnalytics />} />
+              <Route path="allwaste" element={<AdminWasteReports />} />
+              <Route path="campaignform" element={<CampaignForm />} />
+              <Route path="allcampaign" element={<AllCampaigns />} />
+              <Route path="allstaffs" element={<AllStaffs />} />
+              <Route path="allstudents" element={<AllStudents />} />
+              <Route path="cleaingstaff" element={<CleaningStaffAdmin />} />
+              
             </Route>
 
             {/* 404 */}
             <Route path="*" element={<Error404 />} />
-
           </Routes>
         </Suspense>
       </BrowserRouter>

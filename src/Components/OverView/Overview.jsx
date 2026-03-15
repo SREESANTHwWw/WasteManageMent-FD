@@ -62,14 +62,14 @@ const Overview = () => {
     },
     {
       title: "Reports Resolved",
-      value: user?.wastereports.filter(r => r.status === "RESOLVED").length || 0,
+      value: user?.wastereports?.filter(r => r.status === "RESOLVED").length || 0,
       icon: Leaf,
       color: "text-emerald-600",
       bg: "bg-emerald-100",
     },
     {
       title: "Active Reports",
-      value: reports.filter((r) => r.status !== "RESOLVED").length,
+      value: reports?.filter((r) => r.status !== "RESOLVED").length,
       icon: Zap,
       color: "text-purple-600",
       bg: "bg-purple-100",
